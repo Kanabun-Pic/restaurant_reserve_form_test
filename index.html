@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ご予約 | Restaurant</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Noto+Serif+JP:wght@300;400&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0e0c0a;
+      --surface: #161410;
+      --border: #2e2820;
+      --border-light: #3d3428;
+      --gold: #c9a96e;
+      --gold-dim: #8a6f45;
+      --text: #e8dfd0;
+      --text-muted: #7a6f62;
+      --text-label: #b0a090;
+      --error: #c47a5a;
+      --radius: 4px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Noto Serif JP', serif;
+      font-weight: 300;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 60px 20px 80px;
+    }
+
+    /* Background texture */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        radial-gradient(ellipse 80% 60% at 50% -10%, rgba(201,169,110,0.07) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .wrapper {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 560px;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 56px;
+      animation: fadeUp 0.8s ease both;
+    }
+
+    .header-ornament {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .header-ornament::before,
+    .header-ornament::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--gold-dim));
+    }
+    .header-ornament::after {
+      background: linear-gradient(to left, transparent, var(--gold-dim));
+    }
+
+    .header-ornament-diamond {
+      width: 8px;
+      height: 8px;
+      background: var(--gold);
+      transform: rotate(45deg);
+    }
+
+    .header-en {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 11px;
+      font-weight: 300;
+      letter-spacing: 0.35em;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .header-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 42px;
+      font-weight: 300;
+      font-style: italic;
+      color: var(--text);
+      line-height: 1.1;
+      margin-bottom: 16px;
+    }
+
+    .header-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 2;
+      letter-spacing: 0.05em;
+    }
+
+    /* Form card */
+    .form-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 48px 44px;
+      animation: fadeUp 0.8s 0.15s ease both;
+    }
+
+    /* Section */
+    .form-section {
+      margin-bottom: 36px;
+    }
+
+    .section-label {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 11px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border-light);
+    }
+
+    /* Field */
+    .field {
+      margin-bottom: 20px;
+    }
+
+    .field:last-child { margin-bottom: 0; }
+
+    label {
+      display: block;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      color: var(--text-label);
+      margin-bottom: 8px;
+    }
+
+    .required-mark {
+      color: var(--gold);
+      margin-left: 4px;
+      font-size: 10px;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    select {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-family: 'Noto Serif JP', serif;
+      font-size: 14px;
+      font-weight: 300;
+      padding: 12px 16px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    select:focus {
+      border-color: var(--gold-dim);
+      box-shadow: 0 0 0 3px rgba(201,169,110,0.08);
+    }
+
+    input::placeholder { color: var(--text-muted); font-size: 13px; }
+
+    /* Select wrapper */
+    .select-wrapper {
+      position: relative;
+    }
+
+    .select-wrapper::after {
+      content: '';
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 6px;
+      height: 6px;
+      border-right: 1px solid var(--gold-dim);
+      border-bottom: 1px solid var(--gold-dim);
+      transform: translateY(-65%) rotate(45deg);
+      pointer-events: none;
+    }
+
+    select { cursor: pointer; padding-right: 40px; }
+    select option { background: #1a1710; color: var(--text); }
+
+    /* Radio group */
+    .radio-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .radio-option {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 14px 16px;
+      background: var(--bg);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .radio-option:hover { border-color: var(--gold-dim); }
+
+    .radio-option input[type="radio"] {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      min-width: 16px;
+      border: 1px solid var(--border-light);
+      border-radius: 50%;
+      margin-top: 1px;
+      position: relative;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+
+    .radio-option input[type="radio"]:checked {
+      border-color: var(--gold);
+    }
+
+    .radio-option input[type="radio"]:checked::after {
+      content: '';
+      position: absolute;
+      inset: 3px;
+      background: var(--gold);
+      border-radius: 50%;
+    }
+
+    .radio-option:has(input:checked) {
+      border-color: var(--gold-dim);
+      background: rgba(201,169,110,0.04);
+    }
+
+    .radio-label {
+      flex: 1;
+    }
+
+    .radio-title {
+      font-size: 13px;
+      color: var(--text);
+      letter-spacing: 0.05em;
+      line-height: 1.4;
+    }
+
+    .radio-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 3px;
+      letter-spacing: 0.05em;
+    }
+
+    /* Date input group */
+    .date-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    /* Divider */
+    .form-divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+
+    /* Note */
+    .form-note {
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.9;
+      letter-spacing: 0.05em;
+      margin-top: -8px;
+      margin-bottom: 32px;
+      padding: 14px 16px;
+      background: rgba(255,255,255,0.02);
+      border-left: 2px solid var(--border-light);
+    }
+
+    /* Submit */
+    .submit-wrapper {
+      text-align: center;
+      margin-top: 40px;
+    }
+
+    .btn-submit {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      background: transparent;
+      border: 1px solid var(--gold-dim);
+      color: var(--gold);
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 13px;
+      font-weight: 300;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      padding: 16px 48px;
+      cursor: pointer;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-submit::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--gold);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.3s ease;
+      z-index: 0;
+    }
+
+    .btn-submit:hover::before { transform: scaleX(1); }
+
+    .btn-submit:hover {
+      color: var(--bg);
+      border-color: var(--gold);
+    }
+
+    .btn-submit span { position: relative; z-index: 1; }
+
+    .btn-submit:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .btn-submit:disabled::before { display: none; }
+
+    /* Success state */
+    .success-message {
+      display: none;
+      text-align: center;
+      padding: 48px 0;
+      animation: fadeUp 0.6s ease both;
+    }
+
+    .success-icon {
+      width: 56px;
+      height: 56px;
+      border: 1px solid var(--gold-dim);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+      color: var(--gold);
+      font-size: 20px;
+    }
+
+    .success-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 26px;
+      font-weight: 300;
+      font-style: italic;
+      color: var(--text);
+      margin-bottom: 12px;
+    }
+
+    .success-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 2;
+      letter-spacing: 0.05em;
+    }
+
+    /* Error */
+    .field-error {
+      font-size: 11px;
+      color: var(--error);
+      margin-top: 6px;
+      letter-spacing: 0.05em;
+    }
+
+    input.error, select.error { border-color: var(--error); }
+
+    /* Footer */
+    .footer {
+      margin-top: 40px;
+      text-align: center;
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 0.1em;
+      animation: fadeUp 0.8s 0.3s ease both;
+    }
+
+    /* Animations */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .form-card { padding: 36px 24px; }
+      .header-title { font-size: 34px; }
+      .date-group { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="wrapper">
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-ornament">
+      <div class="header-ornament-diamond"></div>
+    </div>
+    <p class="header-en">Reservation</p>
+    <h1 class="header-title">ご予約</h1>
+    <p class="header-desc">
+      ご予約は2日前までにお願いいたします。<br>
+      確認メールを送信しますので、受信設定をご確認ください。
+    </p>
+  </header>
+
+  <!-- Form Card -->
+  <div class="form-card">
+    <form id="reservationForm" novalidate>
+
+      <!-- お客様情報 -->
+      <div class="form-section">
+        <div class="section-label">お客様情報</div>
+
+        <div class="field">
+          <label for="name">お名前<span class="required-mark">*</span></label>
+          <input type="text" id="name" name="name" placeholder="山田 太郎" autocomplete="name" />
+          <div class="field-error" id="name-error"></div>
+        </div>
+
+        <div class="field">
+          <label for="email">メールアドレス<span class="required-mark">*</span></label>
+          <input type="email" id="email" name="email" placeholder="example@mail.com" autocomplete="email" />
+          <div class="field-error" id="email-error"></div>
+        </div>
+      </div>
+
+      <hr class="form-divider" />
+
+      <!-- 予約内容 -->
+      <div class="form-section">
+        <div class="section-label">予約内容</div>
+
+        <!-- 日付・部 -->
+        <div class="field">
+          <label>ご希望日時<span class="required-mark">*</span></label>
+          <div class="date-group">
+            <div class="select-wrapper">
+              <select id="date" name="date">
+                <option value="">日付を選択</option>
+              </select>
+            </div>
+            <div class="select-wrapper">
+              <select id="part" name="part">
+                <option value="">部を選択</option>
+                <option value="first">第1部　17:00〜19:00</option>
+                <option value="second">第2部　19:30〜21:30</option>
+              </select>
+            </div>
+          </div>
+          <div class="field-error" id="datetime-error"></div>
+        </div>
+
+        <!-- 人数 -->
+        <div class="field">
+          <label for="guests">人数<span class="required-mark">*</span></label>
+          <div class="select-wrapper">
+            <select id="guests" name="guests">
+              <option value="">人数を選択</option>
+              <option value="1">1名</option>
+              <option value="2">2名</option>
+              <option value="3">3名</option>
+              <option value="4">4名</option>
+            </select>
+          </div>
+          <div class="field-error" id="guests-error"></div>
+        </div>
+
+        <!-- テーブル -->
+        <div class="field">
+          <label>テーブル<span class="required-mark">*</span></label>
+          <div class="radio-group">
+            <label class="radio-option">
+              <input type="radio" name="table" value="4seat" />
+              <div class="radio-label">
+                <div class="radio-title">テーブルA（4人がけ）</div>
+                <div class="radio-sub">ゆったりとした配置　— 最大4名様</div>
+              </div>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="table" value="2seat-1" />
+              <div class="radio-label">
+                <div class="radio-title">テーブルB（2人がけ）</div>
+                <div class="radio-sub">窓側のお席　— 最大2名様</div>
+              </div>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="table" value="2seat-2" />
+              <div class="radio-label">
+                <div class="radio-title">テーブルC（2人がけ）</div>
+                <div class="radio-sub">カウンター横のお席　— 最大2名様</div>
+              </div>
+            </label>
+          </div>
+          <div class="field-error" id="table-error"></div>
+        </div>
+
+      </div>
+
+      <!-- Note -->
+      <div class="form-note">
+        アレルギーや特別なご要望がございましたら、ご予約後にメールにてお知らせください。<br>
+        キャンセルは前日17時までにご連絡ください。
+      </div>
+
+      <!-- Submit -->
+      <div class="submit-wrapper">
+        <button type="submit" class="btn-submit" id="submitBtn">
+          <span>予約を確定する</span>
+        </button>
+      </div>
+
+    </form>
+
+    <!-- Success -->
+    <div class="success-message" id="successMessage">
+      <div class="success-icon">✓</div>
+      <p class="success-title">ご予約を承りました</p>
+      <p class="success-desc" id="successDetail"></p>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>ご不明な点はお電話にてお問い合わせください</p>
+  </footer>
+
+</div>
+
+<script>
+  // ---- 日付セレクトの生成（今日から60日） ----
+  (function() {
+    const sel = document.getElementById('date');
+    const now = new Date();
+    const days = ['日','月','火','水','木','金','土'];
+    for (let i = 2; i <= 62; i++) {
+      const d = new Date(now);
+      d.setDate(now.getDate() + i);
+      const m = d.getMonth() + 1;
+      const day = d.getDate();
+      const wd = days[d.getDay()];
+      const val = d.toISOString().split('T')[0];
+      const opt = document.createElement('option');
+      opt.value = val;
+      opt.textContent = `${m}月${day}日（${wd}）`;
+      sel.appendChild(opt);
+    }
+  })();
+
+  // ---- バリデーション ----
+  function clearErrors() {
+    document.querySelectorAll('.field-error').forEach(el => el.textContent = '');
+    document.querySelectorAll('.error').forEach(el => el.classList.remove('error'));
+  }
+
+  function setError(fieldId, errorId, msg) {
+    const field = document.getElementById(fieldId);
+    const err   = document.getElementById(errorId);
+    if (field) field.classList.add('error');
+    if (err)   err.textContent = msg;
+  }
+
+  function validate() {
+    clearErrors();
+    let valid = true;
+    const name  = document.getElementById('name').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const date  = document.getElementById('date').value;
+    const part  = document.getElementById('part').value;
+    const guests = document.getElementById('guests').value;
+    const table = document.querySelector('input[name="table"]:checked');
+
+    if (!name)  { setError('name',  'name-error',  'お名前を入力してください'); valid = false; }
+    if (!email) { setError('email', 'email-error', 'メールアドレスを入力してください'); valid = false; }
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setError('email', 'email-error', '正しいメールアドレスを入力してください'); valid = false;
+    }
+    if (!date || !part) {
+      document.getElementById('datetime-error').textContent = '日付と部をご選択ください'; valid = false;
+    }
+    if (!guests) { setError('guests', 'guests-error', '人数をご選択ください'); valid = false; }
+    if (!table)  { document.getElementById('table-error').textContent = 'テーブルをご選択ください'; valid = false; }
+
+    return valid;
+  }
+
+  // ---- フォーム送信 ----
+  document.getElementById('reservationForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    if (!validate()) return;
+
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.querySelector('span').textContent = '送信中...';
+
+    const data = {
+      name:   document.getElementById('name').value.trim(),
+      email:  document.getElementById('email').value.trim(),
+      date:   document.getElementById('date').value,
+      part:   document.getElementById('part').options[document.getElementById('part').selectedIndex].text,
+      guests: document.getElementById('guests').value,
+      table:  document.querySelector('input[name="table"]:checked').value,
+    };
+
+    // ▼ GAS の URL に差し替えてください
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbzqn-T421wPFQ6Ld9NkzZUpTF1QkH_SabdWrAno-B0bq_d3jtgqKfsXlZuDOr5H4tPLeQ/exec';
+
+    try {
+      await fetch(GAS_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      // 成功表示
+      document.getElementById('reservationForm').style.display = 'none';
+      const success = document.getElementById('successMessage');
+      success.style.display = 'block';
+      document.getElementById('successDetail').innerHTML =
+        `${data.name} 様<br>${data.date.replace(/-/g,'/')} ${data.part}<br>` +
+        `ご確認メールを <strong style="color:var(--gold)">${data.email}</strong> にお送りしました。`;
+
+    } catch (err) {
+      btn.disabled = false;
+      btn.querySelector('span').textContent = '予約を確定する';
+      alert('送信に失敗しました。しばらくしてから再度お試しください。');
+    }
+  });
+</script>
+</body>
+</html>
