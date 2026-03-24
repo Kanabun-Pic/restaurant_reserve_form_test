@@ -1,634 +1,794 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ご予約 — 薬膳カフェ 和花</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600&family=Klee+One&family=Kaisei+Tokumin:wght@400;500&display=swap" rel="stylesheet">
-<style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ご予約 | 薬膳カフェ 結（ゆい）</title>
+  <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:           #F4EFE5;
+      --surface:      #FDFAF5;
+      --border:       #D8CCB8;
+      --border-light: #EAE0D0;
+      --terra:        #A85840;
+      --terra-hover:  #8C4430;
+      --sage:         #6B8A5E;
+      --ink:          #2C2218;
+      --text:         #3A2E26;
+      --text-muted:   #8A7262;
+      --text-label:   #5C4A3C;
+      --error:        #B04030;
+      --note-bg:      #F0EAE0;
+    }
 
-:root {
-  --paper:      #f9f3eb;
-  --paper2:     #f2e8da;
-  --paper3:     #8a6040;  /* 番号色：薄ベージュ→濃い茶に */
-  --ink:        #1e0e04;  /* 本文：さらに濃く */
-  --ink-mid:    #3a1e08;  /* ラベル：濃く */
-  --ink-light:  #5a3a20;  /* 補足テキスト：大幅に濃く */
-  --pink:       #d4786a;
-  --pink-pale:  #f5ddd6;
-  --terra:      #a84030;  /* アクセント：少し濃く */
-  --rust:       #7a2c18;
-  --border:     #d4b89a;
-  --border2:    #a07850;  /* ボーダー：少し濃く */
-  --dis-text:   #7a6858;
-  --err:        #a02020;
-}
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-body {
-  background-color: var(--paper);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
-  min-height: 100vh;
-  padding: 48px 20px 100px;
-  color: var(--ink);
-  font-family: 'Klee One', 'Shippori Mincho', serif;
-}
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Shippori Mincho', 'Hiragino Mincho ProN', 'Yu Mincho', serif;
+      font-weight: 400;
+      font-size: 16px;
+      line-height: 1.8;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 64px 20px 88px;
+    }
 
-/* ─── ヘッダー ─── */
-.site-header {
-  max-width: 580px;
-  margin: 0 auto 44px;
-  padding-left: 4px;
-}
-.header-eyebrow {
-  font-family: 'Shippori Mincho', serif;
-  font-size: 11px;
-  letter-spacing: 6px;
-  color: var(--pink);
-  margin-bottom: 10px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.header-eyebrow::before {
-  content: '';
-  display: block;
-  width: 24px; height: 1px;
-  background: var(--pink);
-}
-.shop-name {
-  font-family: 'Kaisei Tokumin', serif;
-  font-size: clamp(28px, 7vw, 40px);
-  font-weight: 500;
-  color: var(--ink);
-  letter-spacing: 4px;
-  line-height: 1.1;
-  margin-bottom: 8px;
-}
-.shop-name .accent { color: var(--terra); }
-.header-sub {
-  font-family: 'Shippori Mincho', serif;
-  font-size: 13px;
-  color: var(--ink-light);
-  letter-spacing: 3px;
-}
-.stamp-area {
-  display: flex;
-  align-items: flex-end;
-  gap: 0;
-  margin-top: 18px;
-}
-.stamp {
-  display: inline-block;
-  border: 2px solid var(--terra);
-  border-radius: 3px;
-  padding: 4px 10px;
-  font-family: 'Shippori Mincho', serif;
-  font-size: 12px;
-  letter-spacing: 2px;
-  color: var(--terra);
-  transform: rotate(-1.5deg);
-  opacity: 0.85;
-  margin-right: 10px;
-}
-.stamp2 {
-  font-family: 'Klee One', serif;
-  font-size: 12px;
-  color: var(--ink-light);
-  padding-bottom: 2px;
-  border-bottom: 1px solid var(--border);
-}
+    .wrapper {
+      width: 100%;
+      max-width: 580px;
+    }
 
-/* ─── フォームラッパー ─── */
-.form-wrap { max-width: 580px; margin: 0 auto; }
+    /* ---- Header ---- */
+    .header {
+      text-align: center;
+      margin-bottom: 48px;
+      animation: fadeUp 0.7s ease both;
+    }
 
-/* ─── セクションブロック ─── */
-.section-block {
-  background: #fff;
-  border: 1px solid var(--border);
-  border-radius: 0;
-  margin-bottom: 3px;
-  padding: 28px 28px 24px;
-  position: relative;
-}
-.section-block::before {
-  content: '';
-  position: absolute;
-  left: 0; top: 18px; bottom: 18px;
-  width: 3px;
-  background: var(--pink-pale);
-  border-radius: 0 2px 2px 0;
-}
-.section-block.s2::before { background: var(--paper2); top: 12px; bottom: 12px; }
-.section-block.s3::before { top: 24px; bottom: 24px; background: #f0e4d8; }
+    .header-herb {
+      display: block;
+      margin: 0 auto 22px;
+    }
 
-.section-label {
-  font-family: 'Shippori Mincho', serif;
-  font-size: 13px;
-  letter-spacing: 4px;
-  color: var(--ink-mid);
-  margin-bottom: 20px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.section-label .num {
-  font-size: 20px;
-  font-weight: 600;
-  color: var(--paper3);
-  line-height: 1;
-  font-family: 'Kaisei Tokumin', serif;
-}
+    .header-cafe-name {
+      font-size: 13px;
+      letter-spacing: 0.3em;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
 
-/* ─── フィールド ─── */
-.field { margin-bottom: 22px; }
-.field:last-child { margin-bottom: 0; }
+    .header-title {
+      font-size: 30px;
+      font-weight: 600;
+      color: var(--ink);
+      letter-spacing: 0.2em;
+      margin-bottom: 8px;
+    }
 
-.field-label {
-  display: block;
-  font-family: 'Shippori Mincho', serif;
-  font-size: 15px;
-  color: var(--ink-mid);
-  margin-bottom: 8px;
-  letter-spacing: 1px;
-}
-.field-label .req {
-  font-size: 12px;
-  color: var(--terra);
-  margin-left: 5px;
-  font-family: 'Klee One', serif;
-  letter-spacing: 0;
-}
+    .header-subtitle {
+      font-size: 13px;
+      color: var(--sage);
+      letter-spacing: 0.22em;
+      margin-bottom: 18px;
+    }
 
-input[type="text"],
-input[type="email"],
-select {
-  width: 100%;
-  height: 46px;
-  padding: 0 14px;
-  border: 0;
-  border-bottom: 2px solid var(--border2);
-  border-radius: 0;
-  background: transparent;
-  font-family: 'Klee One', serif;
-  font-size: 16px;
-  color: var(--ink);
-  outline: none;
-  transition: border-color 0.2s;
-  appearance: none;
-  -webkit-appearance: none;
-}
-input::placeholder { color: #9a8070; font-size: 15px; }
-input:focus, select:focus { border-bottom-color: var(--terra); }
-input:hover, select:hover { border-bottom-color: var(--pink); }
+    .header-rule {
+      width: 36px;
+      height: 1px;
+      background: var(--border);
+      margin: 0 auto 18px;
+    }
 
-.select-wrap { position: relative; }
-.select-wrap::after {
-  content: '▾';
-  position: absolute;
-  right: 6px; top: 50%;
-  transform: translateY(-50%);
-  font-size: 13px;
-  color: var(--ink-light);
-  pointer-events: none;
-}
+    .header-desc {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 2.1;
+      letter-spacing: 0.05em;
+    }
 
-.row2 {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 18px;
-}
-@media (max-width: 460px) {
-  .row2 { grid-template-columns: 1fr; }
-}
+    /* ---- Form Card ---- */
+    .form-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 52px 48px;
+      box-shadow: 0 2px 18px rgba(44, 34, 24, 0.07);
+      animation: fadeUp 0.7s 0.12s ease both;
+    }
 
-/* ─── テーブル ─── */
-.table-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.radio-card {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 14px 16px;
-  border: 1px solid var(--border);
-  border-radius: 0;
-  background: var(--paper);
-  cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
-  position: relative;
-}
-.radio-card:hover:not(.is-full) {
-  background: var(--pink-pale);
-  border-color: var(--pink);
-}
-.radio-card.selected {
-  background: #fff8f5;
-  border-color: var(--terra);
-  border-left: 3px solid var(--terra);
-  padding-left: 14px;
-}
-.radio-card input[type="radio"] {
-  appearance: none;
-  -webkit-appearance: none;
-  width: 18px; height: 18px;
-  border: 1.5px solid var(--border2);
-  border-radius: 50%;
-  flex-shrink: 0;
-  cursor: pointer;
-  position: relative;
-  transition: border-color 0.15s;
-}
-.radio-card input[type="radio"]:checked { border-color: var(--terra); }
-.radio-card input[type="radio"]::after {
-  content: '';
-  position: absolute;
-  top: 50%; left: 50%;
-  transform: translate(-50%,-50%) scale(0);
-  width: 8px; height: 8px;
-  background: var(--terra);
-  border-radius: 50%;
-  transition: transform 0.15s cubic-bezier(0.34,1.56,0.64,1);
-}
-.radio-card input[type="radio"]:checked::after { transform: translate(-50%,-50%) scale(1); }
+    /* ---- Section heading ---- */
+    .section-heading {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 28px;
+    }
 
-.table-body { flex: 1; }
-.table-name {
-  font-family: 'Shippori Mincho', serif;
-  font-size: 15px;
-  color: var(--ink);
-  letter-spacing: 1px;
-}
-.table-memo {
-  font-size: 12px;
-  color: var(--ink-light);
-  margin-top: 3px;
-  font-family: 'Klee One', serif;
-}
-.cap-tag {
-  font-size: 12px;
-  color: var(--terra);
-  border: 1px solid var(--pink-pale);
-  background: var(--pink-pale);
-  padding: 3px 10px;
-  border-radius: 2px;
-  white-space: nowrap;
-  font-family: 'Shippori Mincho', serif;
-  letter-spacing: 1px;
-}
-.radio-card.is-full {
-  background: var(--paper2);
-  border-color: #ddd;
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-.radio-card.is-full .table-name,
-.radio-card.is-full .table-memo { color: var(--dis-text); }
-.full-tag {
-  display: none;
-  font-size: 10px;
-  background: #ddd;
-  color: #999;
-  padding: 2px 7px;
-  border-radius: 2px;
-  font-family: 'Shippori Mincho', serif;
-  letter-spacing: 1px;
-}
-.radio-card.is-full .full-tag { display: inline; }
-.radio-card.is-full .cap-tag  { display: none; }
+    .section-heading-text {
+      font-size: 13px;
+      letter-spacing: 0.22em;
+      color: var(--terra);
+      white-space: nowrap;
+    }
 
-/* ─── エラー ─── */
-.err-msg {
-  display: none;
-  font-size: 13px;
-  color: var(--err);
-  margin-top: 5px;
-  font-family: 'Klee One', serif;
-  padding-left: 2px;
-}
-.err-msg.show { display: block; }
+    .section-heading-line {
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
 
-/* ─── 注意書き ─── */
-.note-section {
-  max-width: 580px;
-  margin: 0 auto;
-  padding: 20px 28px;
-  background: var(--paper2);
-  border: 1px solid var(--border);
-  border-top: 1px dashed var(--border2);
-  margin-top: 3px;
-}
-.note-section p {
-  font-size: 13px;
-  color: var(--ink-light);
-  line-height: 2.0;
-  font-family: 'Klee One', serif;
-}
-.note-section strong { color: var(--ink-mid); font-size: 13px; }
+    /* ---- Fields ---- */
+    .form-section { margin-bottom: 40px; }
 
-/* ─── 送信ボタン ─── */
-.submit-wrap {
-  max-width: 580px;
-  margin: 28px auto 0;
-  padding-left: 2px;
-}
-.btn-submit {
-  width: 100%;
-  height: 54px;
-  background: var(--terra);
-  color: #fff;
-  border: none;
-  border-radius: 0;
-  font-family: 'Shippori Mincho', serif;
-  font-size: 15px;
-  letter-spacing: 5px;
-  cursor: pointer;
-  transition: background 0.2s, transform 0.1s;
-  box-shadow: 3px 3px 0 var(--rust);
-}
-.btn-submit:hover:not(:disabled) { background: var(--rust); }
-.btn-submit:active:not(:disabled) {
-  transform: translate(2px,2px);
-  box-shadow: 1px 1px 0 var(--rust);
-}
-.btn-submit:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-  box-shadow: 1px 1px 0 #bbb;
-}
+    .field { margin-bottom: 22px; }
+    .field:last-child { margin-bottom: 0; }
 
-/* ─── 完了 ─── */
-#successMessage {
-  display: none;
-  padding: 40px 0 20px;
-  animation: fadeIn 0.5s ease both;
-}
-.success-inner {
-  max-width: 580px;
-  margin: 0 auto;
-  text-align: center;
-}
-.success-mark {
-  font-family: 'Kaisei Tokumin', serif;
-  font-size: 11px;
-  letter-spacing: 4px;
-  color: var(--pink);
-  margin-bottom: 12px;
-}
-.success-title {
-  font-family: 'Kaisei Tokumin', serif;
-  font-size: 22px;
-  letter-spacing: 4px;
-  color: var(--ink);
-  margin-bottom: 10px;
-}
-.success-body {
-  font-size: 14px;
-  color: var(--ink-light);
-  line-height: 2;
-  font-family: 'Klee One', serif;
-}
-#successDetail {
-  margin-top: 24px;
-  display: inline-block;
-  text-align: left;
-  background: #fff;
-  border: 1px solid var(--border);
-  border-left: 3px solid var(--terra);
-  padding: 18px 24px;
-  font-size: 14px;
-  color: var(--ink-mid);
-  line-height: 2.2;
-  font-family: 'Klee One', serif;
-  min-width: 240px;
-}
+    label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      color: var(--text-label);
+      margin-bottom: 8px;
+    }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(12px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.form-wrap > * { animation: fadeIn 0.6s ease both; }
-.form-wrap > *:nth-child(1) { animation-delay: 0.05s; }
-.form-wrap > *:nth-child(2) { animation-delay: 0.12s; }
-.form-wrap > *:nth-child(3) { animation-delay: 0.19s; }
+    .required-mark {
+      color: var(--terra);
+      margin-left: 4px;
+      font-size: 12px;
+    }
 
-@media (max-width: 480px) {
-  body { padding: 32px 14px 80px; }
-  .section-block { padding: 22px 18px 18px; }
-  .note-section  { padding: 18px; }
-  .submit-wrap   { margin-top: 22px; }
-  .shop-name     { letter-spacing: 2px; }
-}
-</style>
+    input[type="text"],
+    input[type="email"],
+    select {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 1px;
+      color: var(--text);
+      font-family: 'Shippori Mincho', 'Hiragino Mincho ProN', 'Yu Mincho', serif;
+      font-size: 15px;
+      font-weight: 400;
+      padding: 13px 16px;
+      outline: none;
+      transition: border-color 0.2s;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    select:focus {
+      border-color: var(--terra);
+    }
+
+    input::placeholder { color: #C0A898; font-size: 14px; }
+
+    /* Select */
+    .select-wrapper { position: relative; }
+
+    .select-wrapper::after {
+      content: '';
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      width: 7px;
+      height: 7px;
+      border-right: 1.5px solid var(--text-muted);
+      border-bottom: 1.5px solid var(--text-muted);
+      transform: translateY(-65%) rotate(45deg);
+      pointer-events: none;
+    }
+
+    select { cursor: pointer; padding-right: 40px; }
+    select option { background: var(--surface); color: var(--text); }
+
+    /* Date group */
+    .date-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    /* Radio */
+    .radio-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .radio-option {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 15px 18px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 1px;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+
+    .radio-option:hover { border-color: #C07060; }
+
+    .radio-option input[type="radio"] {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      min-width: 18px;
+      border: 1.5px solid var(--border);
+      border-radius: 50%;
+      margin-top: 2px;
+      position: relative;
+      cursor: pointer;
+      transition: border-color 0.2s;
+      flex-shrink: 0;
+    }
+
+    .radio-option input[type="radio"]:checked { border-color: var(--terra); }
+
+    .radio-option input[type="radio"]:checked::after {
+      content: '';
+      position: absolute;
+      inset: 3px;
+      background: var(--terra);
+      border-radius: 50%;
+    }
+
+    .radio-option:has(input:checked) {
+      border-color: var(--terra);
+      background: #FBF5EF;
+    }
+
+    .radio-label { flex: 1; }
+
+    .radio-title {
+      font-size: 15px;
+      color: var(--text);
+      letter-spacing: 0.05em;
+      line-height: 1.5;
+    }
+
+    .radio-sub {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 3px;
+      letter-spacing: 0.03em;
+    }
+
+    /* Divider */
+    .form-divider {
+      border: none;
+      border-top: 1px solid var(--border-light);
+      margin: 36px 0;
+    }
+
+    /* Note */
+    .form-note {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 2.1;
+      letter-spacing: 0.04em;
+      margin-bottom: 32px;
+      padding: 16px 20px;
+      background: var(--note-bg);
+      border-left: 3px solid var(--border);
+    }
+
+    /* Submit */
+    .submit-wrapper { text-align: center; margin-top: 36px; }
+
+    .btn-submit {
+      display: inline-block;
+      background: var(--terra);
+      border: none;
+      color: #FDFAF5;
+      font-family: 'Shippori Mincho', serif;
+      font-size: 15px;
+      font-weight: 500;
+      letter-spacing: 0.28em;
+      padding: 16px 60px;
+      cursor: pointer;
+      transition: background 0.2s;
+      border-radius: 1px;
+    }
+
+    .btn-submit:hover { background: var(--terra-hover); }
+
+    .btn-submit:disabled {
+      background: #C0A898;
+      cursor: not-allowed;
+    }
+
+    /* ---- Errors ---- */
+    .field-error {
+      font-size: 13px;
+      color: var(--error);
+      margin-top: 6px;
+      letter-spacing: 0.03em;
+    }
+
+    input.error, select.error { border-color: var(--error); }
+
+    /* ---- Sold out ---- */
+    .radio-option.sold-out {
+      opacity: 0.45;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    .sold-out-label {
+      display: block;
+      font-size: 12px;
+      color: var(--error);
+      margin-top: 4px;
+    }
+
+    /* ---- 完了画面 ---- */
+    .success-screen {
+      display: none;
+      text-align: center;
+      padding: 52px 24px 48px;
+      animation: fadeUp 0.6s ease both;
+    }
+
+    .success-herb {
+      display: block;
+      margin: 0 auto 28px;
+    }
+
+    .success-title {
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--ink);
+      letter-spacing: 0.2em;
+      margin-bottom: 16px;
+    }
+
+    .success-lead {
+      font-size: 15px;
+      color: var(--text);
+      line-height: 2.2;
+      letter-spacing: 0.06em;
+      margin-bottom: 24px;
+    }
+
+    .success-detail-box {
+      text-align: left;
+      margin: 0 auto 24px;
+      max-width: 360px;
+      padding: 20px 26px;
+      background: var(--note-bg);
+      border: 1px solid var(--border);
+      font-size: 14px;
+      color: var(--text);
+      line-height: 2.2;
+      letter-spacing: 0.05em;
+    }
+
+    .success-detail-box .label {
+      font-size: 12px;
+      color: var(--text-muted);
+      letter-spacing: 0.1em;
+      display: block;
+      margin-top: 10px;
+    }
+
+    .success-detail-box .label:first-child { margin-top: 0; }
+
+    .success-detail-box .value {
+      display: block;
+      color: var(--ink);
+      font-weight: 500;
+    }
+
+    .success-email { color: var(--terra); }
+
+    .success-closing {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 2.2;
+      letter-spacing: 0.05em;
+    }
+
+    /* ---- Footer ---- */
+    .footer {
+      margin-top: 36px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--text-muted);
+      letter-spacing: 0.1em;
+      line-height: 2;
+      animation: fadeUp 0.7s 0.24s ease both;
+    }
+
+    /* ---- Animation ---- */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ---- Responsive ---- */
+    @media (max-width: 600px) {
+      .form-card { padding: 36px 24px; }
+      .date-group { grid-template-columns: 1fr; }
+      .header-title { font-size: 26px; }
+    }
+  </style>
 </head>
 <body>
 
-<header class="site-header">
-  <p class="header-eyebrow">ご予約フォーム</p>
-  <h1 class="shop-name">薬膳カフェ <span class="accent">和花</span></h1>
-  <p class="header-sub">Yakuzen Café  Waka</p>
-  <div class="stamp-area">
-    <span class="stamp">要予約</span>
-    <span class="stamp2">2名様〜 / 完全予約制</span>
-  </div>
-</header>
+<div class="wrapper">
 
-<div class="form-wrap">
-<form id="reservationForm" novalidate>
+  <!-- Header -->
+  <header class="header">
 
-  <div class="section-block s1">
-    <p class="section-label"><span class="num">01</span>お客様情報</p>
-    <div class="field">
-      <label class="field-label" for="name">お名前<span class="req">※必須</span></label>
-      <input type="text" id="name" name="name" autocomplete="name" placeholder="山田 太郎">
-      <p class="err-msg" id="name-error">お名前を入力してください</p>
-    </div>
-    <div class="field">
-      <label class="field-label" for="email">メールアドレス<span class="req">※必須</span></label>
-      <input type="email" id="email" name="email" autocomplete="email" placeholder="example@mail.com">
-      <p class="err-msg" id="email-error">正しいメールアドレスを入力してください</p>
-    </div>
-  </div>
+    <!-- 薬草モチーフ（手描き風SVG） -->
+    <svg class="header-herb" width="72" height="60" viewBox="0 0 72 60" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <!-- 茎 -->
+      <path d="M36 56 C35.8 50 35.6 40 36 18" stroke="#6B8A5E" stroke-width="1.3" stroke-linecap="round"/>
+      <!-- 左の葉（下） -->
+      <path d="M36 42 C31 37 23 37 21 40 C26 40 33 44 36 42Z" fill="#6B8A5E" opacity="0.65"/>
+      <!-- 右の葉（中） -->
+      <path d="M36 34 C41 29 49 29 51 32 C46 32 39 36 36 34Z" fill="#7A9E6E" opacity="0.65"/>
+      <!-- 左の葉（中上） -->
+      <path d="M36 26 C31 21 24 21 22 24 C27 24 33 28 36 26Z" fill="#6B8A5E" opacity="0.55"/>
+      <!-- 右の小葉（上） -->
+      <path d="M36 20 C40 16 46 17 47 20 C43 19 38 22 36 20Z" fill="#7A9E6E" opacity="0.5"/>
+      <!-- つぼみ -->
+      <ellipse cx="36" cy="13" rx="3" ry="4" fill="#A85840" opacity="0.75"/>
+      <ellipse cx="30" cy="16" rx="2" ry="3" fill="#C47A5A" opacity="0.5" transform="rotate(-18 30 16)"/>
+      <ellipse cx="42" cy="16" rx="2" ry="3" fill="#C47A5A" opacity="0.5" transform="rotate(18 42 16)"/>
+    </svg>
 
-  <div class="section-block s2">
-    <p class="section-label"><span class="num">02</span>ご希望日時・人数</p>
-    <div class="row2">
-      <div class="field">
-        <label class="field-label" for="date">希望日<span class="req">※</span></label>
-        <div class="select-wrap">
-          <select id="date" name="date"><option value="">日付を選択</option></select>
+    <p class="header-cafe-name">薬膳カフェ &nbsp; 結（ゆい）</p>
+    <h1 class="header-title">ご予約</h1>
+    <p class="header-subtitle">— 季節の薬膳でからだを整える —</p>
+    <div class="header-rule"></div>
+    <p class="header-desc">
+      ご予約は2日前までにお願いいたします。<br>
+      ご確認メールをお送りしますので、受信設定をあらかじめご確認ください。
+    </p>
+  </header>
+
+  <!-- Form Card -->
+  <div class="form-card">
+    <form id="reservationForm" novalidate>
+
+      <!-- お客様情報 -->
+      <div class="form-section">
+        <div class="section-heading">
+          <span class="section-heading-text">お客様情報</span>
+          <span class="section-heading-line"></span>
+        </div>
+
+        <div class="field">
+          <label for="name">お名前<span class="required-mark">*</span></label>
+          <input type="text" id="name" name="name" placeholder="山田 花子" autocomplete="name" />
+          <div class="field-error" id="name-error"></div>
+        </div>
+
+        <div class="field">
+          <label for="email">メールアドレス<span class="required-mark">*</span></label>
+          <input type="email" id="email" name="email" placeholder="hanako@example.com" autocomplete="email" />
+          <div class="field-error" id="email-error"></div>
         </div>
       </div>
-      <div class="field">
-        <label class="field-label" for="part">希望の部<span class="req">※</span></label>
-        <div class="select-wrap">
-          <select id="part" name="part">
-            <option value="">部を選択</option>
-            <option value="first">第1部　17:00〜19:00</option>
-            <option value="second">第2部　19:30〜21:30</option>
-          </select>
+
+      <hr class="form-divider" />
+
+      <!-- ご予約内容 -->
+      <div class="form-section">
+        <div class="section-heading">
+          <span class="section-heading-text">ご予約内容</span>
+          <span class="section-heading-line"></span>
         </div>
+
+        <!-- 日時 -->
+        <div class="field">
+          <label>ご希望の日時<span class="required-mark">*</span></label>
+          <div class="date-group">
+            <div class="select-wrapper">
+              <select id="date" name="date">
+                <option value="">日付を選択</option>
+              </select>
+            </div>
+            <div class="select-wrapper">
+              <select id="part" name="part">
+                <option value="">お時間を選択</option>
+                <option value="first">ランチ　11:30〜13:30</option>
+                <option value="second">ティータイム　14:00〜16:00</option>
+              </select>
+            </div>
+          </div>
+          <div class="field-error" id="datetime-error"></div>
+        </div>
+
+        <!-- 人数 -->
+        <div class="field">
+          <label for="guests">人数<span class="required-mark">*</span></label>
+          <div class="select-wrapper">
+            <select id="guests" name="guests">
+              <option value="">人数を選択</option>
+              <option value="1">1名</option>
+              <option value="2">2名</option>
+              <option value="3">3名</option>
+              <option value="4">4名</option>
+            </select>
+          </div>
+          <div class="field-error" id="guests-error"></div>
+        </div>
+
+        <!-- お席 -->
+        <div class="field">
+          <label>お席<span class="required-mark">*</span></label>
+          <div class="radio-group">
+            <label class="radio-option">
+              <input type="radio" name="table" value="4seat" />
+              <div class="radio-label">
+                <div class="radio-title">テーブル席（4名様まで）</div>
+                <div class="radio-sub">ゆったりとお過ごしいただける広めのお席です</div>
+              </div>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="table" value="2seat-a" />
+              <div class="radio-label">
+                <div class="radio-title">窓側のお席（2名様まで）</div>
+                <div class="radio-sub">中庭の緑を眺めながらお過ごしいただけます</div>
+              </div>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="table" value="2seat-b" />
+              <div class="radio-label">
+                <div class="radio-title">カウンター席（2名様まで）</div>
+                <div class="radio-sub">調理の様子をご覧いただけるお席です</div>
+              </div>
+            </label>
+          </div>
+          <div class="field-error" id="table-error"></div>
+        </div>
+
       </div>
-    </div>
-    <p class="err-msg" id="datetime-error" style="margin-top:-10px;margin-bottom:12px;">日付と部をご選択ください</p>
-    <div class="field" style="max-width:160px;">
-      <label class="field-label" for="guests">人数<span class="req">※</span></label>
-      <div class="select-wrap">
-        <select id="guests" name="guests">
-          <option value="">人数を選択</option>
-          <option value="1">1名</option>
-          <option value="2">2名</option>
-          <option value="3">3名</option>
-          <option value="4">4名</option>
-        </select>
+
+      <!-- ご注意事項 -->
+      <div class="form-note">
+        アレルギーや食事制限などがございましたら、ご予約後にメールにてお知らせください。<br>
+        キャンセルは前日17時までに、お電話またはメールにてご連絡ください。
       </div>
-      <p class="err-msg" id="guests-error">人数をご選択ください</p>
+
+      <!-- 送信ボタン -->
+      <div class="submit-wrapper">
+        <button type="submit" class="btn-submit" id="submitBtn">予約を確定する</button>
+      </div>
+
+    </form>
+
+    <!-- 完了画面 -->
+    <div class="success-screen" id="successScreen">
+
+      <svg class="success-herb" width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <circle cx="28" cy="28" r="26.5" stroke="#D8CCB8" stroke-width="1"/>
+        <path d="M28 44 C28 44 28 28 28 19" stroke="#6B8A5E" stroke-width="1.2" stroke-linecap="round"/>
+        <path d="M28 37 C24 33 18 33 17 36 C21 36 26 39 28 37Z" fill="#6B8A5E" opacity="0.65"/>
+        <path d="M28 30 C32 26 38 26 39 29 C35 29 29 32 28 30Z" fill="#7A9E6E" opacity="0.65"/>
+        <path d="M28 23 C25 19 20 19 19 22 C22 22 26 25 28 23Z" fill="#6B8A5E" opacity="0.55"/>
+        <ellipse cx="28" cy="15" rx="2.5" ry="3.5" fill="#A85840" opacity="0.75"/>
+      </svg>
+
+      <p class="success-title">ご予約を承りました</p>
+      <p class="success-lead">
+        心よりお待ちしております。<br>
+        どうぞゆっくりおくつろぎください。
+      </p>
+
+      <div class="success-detail-box" id="successDetail"></div>
+
+      <p class="success-closing">
+        ご確認メールをお送りしました。<br>
+        メールが届かない場合はお電話にてご確認ください。
+      </p>
+
     </div>
   </div>
 
-  <div class="section-block s3">
-    <p class="section-label"><span class="num">03</span>テーブルのご選択</p>
-    <div class="table-grid">
-      <label class="radio-card" data-table="4seat">
-        <input type="radio" name="table" value="4seat">
-        <div class="table-body">
-          <div class="table-name">テーブル A　（4人がけ）</div>
-          <div class="table-memo">窓際のゆったりとした席です</div>
-        </div>
-        <span class="cap-tag">最大4名</span>
-        <span class="full-tag">満席</span>
-      </label>
-      <label class="radio-card" data-table="2seat-1">
-        <input type="radio" name="table" value="2seat-1">
-        <div class="table-body">
-          <div class="table-name">テーブル B　（2人がけ）</div>
-          <div class="table-memo">半個室のような落ち着いた席です</div>
-        </div>
-        <span class="cap-tag">最大2名</span>
-        <span class="full-tag">満席</span>
-      </label>
-      <label class="radio-card" data-table="2seat-2">
-        <input type="radio" name="table" value="2seat-2">
-        <div class="table-body">
-          <div class="table-name">テーブル C　（2人がけ）</div>
-          <div class="table-memo">中庭が見える明るい席です</div>
-        </div>
-        <span class="cap-tag">最大2名</span>
-        <span class="full-tag">満席</span>
-      </label>
-    </div>
-    <p class="err-msg" id="table-error" style="margin-top:8px;">テーブルをご選択ください</p>
-  </div>
-
-</form>
-
-<div class="note-section">
-  <p>
-    <strong>キャンセルについて</strong><br>
-    ご予約日前日の17時までにお電話にてご連絡ください。当日のキャンセルはキャンセル料が発生する場合がございます。<br>
-    ご予約後に確認メールを自動送信いたします。届かない場合はお手数ですがお電話にてご確認ください。
-  </p>
-</div>
-
-<div class="submit-wrap">
-  <button type="submit" form="reservationForm" class="btn-submit" id="submitBtn">予　約　を　送　信　す　る</button>
-</div>
-
-<div id="successMessage">
-  <div class="success-inner">
-    <p class="success-mark">— ご予約完了 —</p>
-    <h2 class="success-title">ありがとうございます</h2>
-    <p class="success-body">ご予約を承りました。<br>ご確認のメールをお送りいたしましたので、ご確認ください。</p>
-    <div id="successDetail"></div>
-  </div>
-</div>
+  <!-- Footer -->
+  <footer class="footer">
+    <p>薬膳カフェ &nbsp; 結（ゆい）</p>
+    <p>ご不明な点はお電話にてお問い合わせください</p>
+  </footer>
 
 </div>
 
 <script>
-const GAS_URL = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec';
-(function(){
-  const sel  = document.getElementById('date');
-  const now  = new Date();
-  const days = ['日','月','火','水','木','金','土'];
-  for (let i = 2; i <= 62; i++) {
-    const d = new Date(now);
-    d.setDate(now.getDate() + i);
-    const val = d.toISOString().split('T')[0];
-    const opt = document.createElement('option');
-    opt.value = val;
-    opt.textContent = `${d.getMonth()+1}月${d.getDate()}日（${days[d.getDay()]}）`;
-    sel.appendChild(opt);
-  }
-})();
+  // ▼ GAS の URL に差し替えてください
+  const GAS_URL = 'https://script.google.com/macros/s/AKfycbzqn-T421wPFQ6Ld9NkzZUpTF1QkH_SabdWrAno-B0bq_d3jtgqKfsXlZuDOr5H4tPLeQ/exec';
 
-document.querySelectorAll('input[name="table"]').forEach(r => {
-  r.addEventListener('change', () => {
-    document.querySelectorAll('.radio-card').forEach(el => el.classList.remove('selected'));
-    if (r.checked) r.closest('.radio-card').classList.add('selected');
+  // ---- 日付セレクト生成（今日から2〜62日後） ----
+  (function () {
+    const sel = document.getElementById('date');
+    const now = new Date();
+    const days = ['日', '月', '火', '水', '木', '金', '土'];
+    for (let i = 2; i <= 62; i++) {
+      const d = new Date(now);
+      d.setDate(now.getDate() + i);
+      const m   = d.getMonth() + 1;
+      const day = d.getDate();
+      const wd  = days[d.getDay()];
+      const val = d.toISOString().split('T')[0];
+      const opt = document.createElement('option');
+      opt.value = val;
+      opt.textContent = `${m}月${day}日（${wd}）`;
+      sel.appendChild(opt);
+    }
+  })();
+
+  // ---- 空き確認 ----
+  async function checkAvailability() {
+    const date = document.getElementById('date').value;
+    const part = document.getElementById('part').value;
+    if (!date || !part) return;
+
+    const tables = ['4seat', '2seat-a', '2seat-b'];
+    for (const table of tables) {
+      try {
+        const res  = await fetch(`${GAS_URL}?date=${date}&part=${part}&table=${table}`);
+        const data = await res.json();
+        updateTableUI(table, data.available);
+      } catch (e) {
+        // 確認に失敗した場合は状態を変えない
+      }
+    }
+  }
+
+  function updateTableUI(tableValue, isAvailable) {
+    const radio = document.querySelector(`input[name="table"][value="${tableValue}"]`);
+    if (!radio) return;
+    const option = radio.closest('.radio-option');
+    const subEl  = option.querySelector('.radio-sub');
+
+    if (!isAvailable) {
+      radio.disabled = true;
+      option.classList.add('sold-out');
+      if (!option.querySelector('.sold-out-label')) {
+        const span = document.createElement('span');
+        span.className = 'sold-out-label';
+        span.textContent = '※ 満席';
+        subEl.after(span);
+      }
+      if (radio.checked) radio.checked = false;
+    } else {
+      radio.disabled = false;
+      option.classList.remove('sold-out');
+      option.querySelector('.sold-out-label')?.remove();
+    }
+  }
+
+  document.getElementById('date').addEventListener('change', checkAvailability);
+  document.getElementById('part').addEventListener('change', checkAvailability);
+
+  // ---- バリデーション ----
+  function clearErrors() {
+    document.querySelectorAll('.field-error').forEach(el => el.textContent = '');
+    document.querySelectorAll('.error').forEach(el => el.classList.remove('error'));
+  }
+
+  function setError(fieldId, errorId, msg) {
+    const field = document.getElementById(fieldId);
+    const err   = document.getElementById(errorId);
+    if (field) field.classList.add('error');
+    if (err)   err.textContent = msg;
+  }
+
+  function validate() {
+    clearErrors();
+    let valid = true;
+    const name   = document.getElementById('name').value.trim();
+    const email  = document.getElementById('email').value.trim();
+    const date   = document.getElementById('date').value;
+    const part   = document.getElementById('part').value;
+    const guests = document.getElementById('guests').value;
+    const table  = document.querySelector('input[name="table"]:checked');
+
+    if (!name) {
+      setError('name', 'name-error', 'お名前を入力してください');
+      valid = false;
+    }
+    if (!email) {
+      setError('email', 'email-error', 'メールアドレスを入力してください');
+      valid = false;
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setError('email', 'email-error', '正しいメールアドレスを入力してください');
+      valid = false;
+    }
+    if (!date || !part) {
+      document.getElementById('datetime-error').textContent = '日付とお時間をご選択ください';
+      valid = false;
+    }
+    if (!guests) {
+      setError('guests', 'guests-error', '人数をご選択ください');
+      valid = false;
+    }
+    if (!table) {
+      document.getElementById('table-error').textContent = 'お席をご選択ください';
+      valid = false;
+    }
+    return valid;
+  }
+
+  // ---- フォーム送信 ----
+  document.getElementById('reservationForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    if (!validate()) return;
+
+    const btn    = document.getElementById('submitBtn');
+    const dateEl = document.getElementById('date');
+    const partEl = document.getElementById('part');
+
+    btn.disabled = true;
+    btn.textContent = '送信中...';
+
+    const data = {
+      name:   document.getElementById('name').value.trim(),
+      email:  document.getElementById('email').value.trim(),
+      date:   dateEl.value,
+      part:   partEl.options[partEl.selectedIndex].text,
+      guests: document.getElementById('guests').value,
+      table:  document.querySelector('input[name="table"]:checked').value,
+    };
+
+    try {
+      const response = await fetch(GAS_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      const result = await response.json();
+
+      if (result.status === 'full') {
+        btn.disabled = false;
+        btn.textContent = '予約を確定する';
+        document.getElementById('table-error').textContent =
+          '申し訳ございません。選択されたお席は満席になりました。別のお席をお選びください。';
+        await checkAvailability();
+        return;
+      }
+
+      if (result.status !== 'success') {
+        throw new Error('unexpected status');
+      }
+
+      // 完了画面へ切り替え
+      document.getElementById('reservationForm').style.display = 'none';
+      const screen = document.getElementById('successScreen');
+      screen.style.display = 'block';
+
+      const tableLabel = {
+        '4seat':   'テーブル席',
+        '2seat-a': '窓側のお席',
+        '2seat-b': 'カウンター席',
+      };
+
+      document.getElementById('successDetail').innerHTML =
+        `<span class="label">お名前</span>` +
+        `<span class="value">${data.name} 様</span>` +
+        `<span class="label">日時</span>` +
+        `<span class="value">${data.date.replace(/-/g, '/')}　${data.part}</span>` +
+        `<span class="label">人数 / お席</span>` +
+        `<span class="value">${data.guests}名様　/ ${tableLabel[data.table] || data.table}</span>` +
+        `<span class="label">確認メール送信先</span>` +
+        `<span class="value success-email">${data.email}</span>`;
+
+    } catch (err) {
+      btn.disabled = false;
+      btn.textContent = '予約を確定する';
+      alert('送信に失敗しました。しばらくしてから再度お試しください。');
+    }
   });
-});
-
-// 残席確認APIはCORSの制約によりHTML側から呼び出せないため、
-// テーブルの有効/無効制御は行わず、二重予約防止はGAS側のisAvailableに委ねる
-
-function showErr(id, msg) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  if (msg) el.textContent = msg;
-  el.classList.add('show');
-}
-function clearErrors() {
-  document.querySelectorAll('.err-msg').forEach(el => el.classList.remove('show'));
-}
-function validate(d) {
-  clearErrors(); let ok = true;
-  if (!d.name)  { showErr('name-error','お名前を入力してください'); ok = false; }
-  if (!d.email) { showErr('email-error','メールアドレスを入力してください'); ok = false; }
-  else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(d.email)) { showErr('email-error','正しいメールアドレスを入力してください'); ok = false; }
-  if (!d.date || !d.part) { showErr('datetime-error','日付と部をご選択ください'); ok = false; }
-  if (!d.guests)          { showErr('guests-error','人数をご選択ください'); ok = false; }
-  if (!d.table) { showErr('table-error','テーブルをご選択ください'); ok = false; }
-  return ok;
-}
-
-document.getElementById('reservationForm').addEventListener('submit', async e => {
-  e.preventDefault();
-  const data = {
-    name:   document.getElementById('name').value.trim(),
-    email:  document.getElementById('email').value.trim(),
-    date:   document.getElementById('date').value,
-    part:   document.getElementById('part').value,
-    guests: document.getElementById('guests').value,
-    table:  (document.querySelector('input[name="table"]:checked')||{}).value||'',
-  };
-  if (!validate(data)) return;
-  const btn = document.getElementById('submitBtn');
-  btn.disabled = true; btn.textContent = '送信中...';
-  try {
-    // GASはCORSヘッダーを返せないため no-cors で送信する
-    // レスポンスは読めないが、GAS側でスプレッドシート記録・メール送信・二重予約防止が行われる
-    await fetch(GAS_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-    // no-cors ではレスポンスが読めないため、送信完了をもって成功とみなす
-    const pl = data.part === 'first' ? '第1部 17:00〜19:00' : '第2部 19:30〜21:30';
-    const tm = {'4seat':'テーブルA','2seat-1':'テーブルB','2seat-2':'テーブルC'};
-    document.getElementById('reservationForm').style.display = 'none';
-    document.getElementById('successMessage').style.display  = 'block';
-    document.getElementById('successDetail').innerHTML =
-      `${data.name} 様<br>${data.date.replace(/-/g,'/')}　${pl}<br>${tm[data.table]}　${data.guests}名<br><br>確認メール送信先：${data.email}`;
-  } catch {
-    alert('エラーが発生しました。しばらく経ってからもう一度お試しください。');
-    btn.disabled = false; btn.textContent = '予　約　を　送　信　す　る';
-  }
-});
 </script>
 </body>
 </html>
