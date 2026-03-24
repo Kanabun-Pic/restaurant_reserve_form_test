@@ -549,9 +549,7 @@ input:hover, select:hover { border-bottom-color: var(--pink); }
 </div>
 
 <script>
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbzqn-T421wPFQ6Ld9NkzZUpTF1QkH_SabdWrAno-B0bq_d3jtgqKfsXlZuDOr5H4tPLeQ/exec';
-const TABLES  = ['4seat','2seat-1','2seat-2'];
-
+const GAS_URL = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec';
 (function(){
   const sel  = document.getElementById('date');
   const now  = new Date();
@@ -574,55 +572,8 @@ document.querySelectorAll('input[name="table"]').forEach(r => {
   });
 });
 
-function updateTableAvailability(map) {
-  document.querySelectorAll('input[name="table"]').forEach(r => {
-    const ok = map[r.value];
-    r.disabled = !ok;
-    const card = r.closest('.radio-card');
-    if (card) {
-      card.classList.toggle('is-full', !ok);
-      if (!ok && r.checked) { r.checked = false; card.classList.remove('selected'); }
-    }
-  });
-}
-
-async function checkAvailability(date) {
-  if (!date) { updateTableAvailability({'4seat':true,'2seat-1':true,'2seat-2':true}); return; }
-  const part = document.getElementById('part').value;
-  if (!part) return;
-  try {
-    const res = await Promise.all(TABLES.map(async t => {
-      const r = await fetch(`${GAS_URL}?date=${date}&part=${part}&table=${t}`);
-      const j = await r.json();
-      return [t, j.available];
-    }));
-    updateTableAvailability(Object.fromEntries(res));
-  } catch(e) { console.warn(e); }
-}
-
-document.getElementById('date').addEventListener('change', e => checkAvailability(e.target.value));
-document.getElementById('part').addEventListener('change', () => {
-  const d = document.getElementById('date').value;
-  if (d) checkAvailability(d);
-});
-
-// ページ読み込み完了時：全テーブル x 全部 を一括チェック
-window.addEventListener('load', async () => {
-  const allDates = Array.from(document.getElementById('date').options)
-    .map(o => o.value).filter(v => v);
-  const allParts = ['first', 'second'];
-  try {
-    await Promise.all(
-      allDates.flatMap(date =>
-        allParts.flatMap(part =>
-          TABLES.map(table =>
-            fetch(GAS_URL + '?date=' + date + '&part=' + part + '&table=' + table)
-          )
-        )
-      )
-    );
-  } catch(e) { console.warn('初期残席確認に失敗しました:', e); }
-});
+// 残席確認APIはCORSの制約によりHTML側から呼び出せないため、
+// テーブルの有効/無効制御は行わず、二重予約防止はGAS側のisAvailableに委ねる
 
 function showErr(id, msg) {
   const el = document.getElementById(id);
@@ -640,11 +591,7 @@ function validate(d) {
   else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(d.email)) { showErr('email-error','正しいメールアドレスを入力してください'); ok = false; }
   if (!d.date || !d.part) { showErr('datetime-error','日付と部をご選択ください'); ok = false; }
   if (!d.guests)          { showErr('guests-error','人数をご選択ください'); ok = false; }
-  if (!d.table)           { showErr('table-error','テーブルをご選択ください'); ok = false; }
-  else {
-    const r = document.querySelector(`input[name="table"][value="${d.table}"]`);
-    if (r && r.disabled) { showErr('table-error','選択中のテーブルは満席です'); ok = false; }
-  }
+  if (!d.table) { showErr('table-error','テーブルをご選択ください'); ok = false; }
   return ok;
 }
 
@@ -662,20 +609,21 @@ document.getElementById('reservationForm').addEventListener('submit', async e =>
   const btn = document.getElementById('submitBtn');
   btn.disabled = true; btn.textContent = '送信中...';
   try {
-    const res  = await fetch(GAS_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data) });
-    const json = await res.json();
-    if (json.status === 'success') {
-      const pl = data.part === 'first' ? '第1部 17:00〜19:00' : '第2部 19:30〜21:30';
-      const tm = {'4seat':'テーブルA','2seat-1':'テーブルB','2seat-2':'テーブルC'};
-      document.getElementById('reservationForm').style.display = 'none';
-      document.getElementById('successMessage').style.display  = 'block';
-      document.getElementById('successDetail').innerHTML =
-        `${data.name} 様<br>${data.date.replace(/-/g,'/')}　${pl}<br>${tm[data.table]}　${data.guests}名<br><br>確認メール送信先：${data.email}`;
-    } else if (json.status === 'full') {
-      alert('申し訳ございません。送信中に満席となりました。別のテーブルまたは日時をお選びください。');
-      btn.disabled = false; btn.textContent = '予　約　を　送　信　す　る';
-      checkAvailability(data.date);
-    } else { throw new Error(); }
+    // GASはCORSヘッダーを返せないため no-cors で送信する
+    // レスポンスは読めないが、GAS側でスプレッドシート記録・メール送信・二重予約防止が行われる
+    await fetch(GAS_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    // no-cors ではレスポンスが読めないため、送信完了をもって成功とみなす
+    const pl = data.part === 'first' ? '第1部 17:00〜19:00' : '第2部 19:30〜21:30';
+    const tm = {'4seat':'テーブルA','2seat-1':'テーブルB','2seat-2':'テーブルC'};
+    document.getElementById('reservationForm').style.display = 'none';
+    document.getElementById('successMessage').style.display  = 'block';
+    document.getElementById('successDetail').innerHTML =
+      `${data.name} 様<br>${data.date.replace(/-/g,'/')}　${pl}<br>${tm[data.table]}　${data.guests}名<br><br>確認メール送信先：${data.email}`;
   } catch {
     alert('エラーが発生しました。しばらく経ってからもう一度お試しください。');
     btn.disabled = false; btn.textContent = '予　約　を　送　信　す　る';
