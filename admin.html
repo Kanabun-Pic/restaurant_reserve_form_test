@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>予約管理</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:               #f5f3f0;
+      --surface:          #ffffff;
+      --surface-alt:      #faf8f6;
+      --border:           #e2ddd8;
+      --border-strong:    #c5bdb5;
+      --accent:           #2c4a6e;
+      --accent-dim:       #4a6d96;
+      --accent-light:     #eef2f7;
+      --text:             #1a1a1a;
+      --text-muted:       #6b6460;
+      --text-label:       #a09890;
+      --available-bg:     #f0f5f0;
+      --available-text:   #2a6040;
+      --booked-bg:        #eef2f7;
+      --booked-text:      #2c4a6e;
+      --cancel-bg:        #f5f5f5;
+      --cancel-text:      #999999;
+      --danger:           #b83232;
+      --danger-light:     #fdf0ee;
+      --danger-border:    #f0c8c8;
+      --shadow-sm:        0 1px 4px rgba(0,0,0,0.06);
+      --shadow:           0 2px 12px rgba(0,0,0,0.09);
+      --radius:           6px;
+      --radius-sm:        4px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Noto Sans JP', sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* ===== Page Header ===== */
+    .page-header {
+      background: var(--surface);
+      border-bottom: 3px solid var(--accent);
+      padding: 0 32px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .header-brand-eyebrow {
+      font-family: 'Noto Serif JP', serif;
+      font-size: 10px;
+      font-weight: 400;
+      color: var(--accent);
+      letter-spacing: 0.25em;
+      border: 1px solid var(--accent);
+      padding: 2px 8px;
+      border-radius: 2px;
+    }
+
+    .header-brand-title {
+      font-family: 'Noto Serif JP', serif;
+      font-size: 19px;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: 0.06em;
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .date-picker-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .date-picker-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    input[type="date"] {
+      background: var(--surface-alt);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-family: 'Noto Sans JP', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 7px 12px;
+      cursor: pointer;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input[type="date"]:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(44,74,110,0.1);
+    }
+
+    .btn-print {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--surface-alt);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm);
+      color: var(--text-muted);
+      font-family: 'Noto Sans JP', sans-serif;
+      font-size: 13px;
+      padding: 7px 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+      line-height: 1;
+    }
+
+    .btn-print:hover {
+      background: var(--accent-light);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .btn-print svg {
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
+    }
+
+    /* ===== Main ===== */
+    .main {
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 36px 24px 72px;
+    }
+
+    /* ===== Date heading ===== */
+    .date-heading {
+      margin-bottom: 32px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: baseline;
+      gap: 16px;
+    }
+
+    .date-heading-text {
+      font-family: 'Noto Serif JP', serif;
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: 0.04em;
+    }
+
+    .date-today-badge {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--accent);
+      background: var(--accent-light);
+      border: 1px solid rgba(44,74,110,0.2);
+      padding: 2px 10px;
+      border-radius: 100px;
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+    }
+
+    /* ===== Section ===== */
+    .section {
+      margin-bottom: 44px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .section-title {
+      font-family: 'Noto Serif JP', serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--accent);
+      letter-spacing: 0.1em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-title::before {
+      content: '';
+      display: inline-block;
+      width: 3px;
+      height: 15px;
+      background: var(--accent);
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    .count-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--accent);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 10px;
+      border-radius: 100px;
+      letter-spacing: 0.06em;
+    }
+
+    /* ===== Summary Grid ===== */
+    .summary-table-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .summary-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .summary-table thead th {
+      background: var(--accent);
+      color: #fff;
+      font-family: 'Noto Serif JP', serif;
+      font-size: 12px;
+      font-weight: 400;
+      letter-spacing: 0.1em;
+      padding: 11px 16px;
+      text-align: center;
+    }
+
+    .summary-table thead th:first-child {
+      text-align: left;
+      width: 140px;
+      background: rgba(44,74,110,0.85);
+    }
+
+    .summary-table tbody tr:first-child td {
+      border-top: none;
+    }
+
+    .summary-table tbody td {
+      border-top: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+      padding: 14px 16px;
+      vertical-align: middle;
+    }
+
+    .summary-table tbody td:last-child {
+      border-right: none;
+    }
+
+    .summary-row-head {
+      background: var(--accent-light);
+    }
+
+    .summary-part-label {
+      font-family: 'Noto Serif JP', serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent);
+      letter-spacing: 0.05em;
+      display: block;
+    }
+
+    .summary-part-time {
+      font-size: 11px;
+      color: var(--text-muted);
+      display: block;
+      margin-top: 2px;
+    }
+
+    .summary-cell-inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 3px;
+    }
+
+    .summary-status {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+
+    .summary-guest {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    td.cell-available { background: var(--available-bg); }
+    td.cell-available .summary-status { color: var(--available-text); }
+
+    td.cell-booked { background: var(--booked-bg); }
+    td.cell-booked .summary-status { color: var(--booked-text); }
+
+    td.cell-loading .summary-status { color: var(--text-label); }
+
+    /* ===== Reservation Table ===== */
+    .table-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .table-scroll {
+      overflow-x: auto;
+    }
+
+    .reservation-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 780px;
+    }
+
+    .reservation-table thead th {
+      background: var(--surface-alt);
+      border-bottom: 2px solid var(--border-strong);
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      padding: 11px 16px;
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    .reservation-table tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background 0.12s;
+    }
+
+    .reservation-table tbody tr:last-child {
+      border-bottom: none;
+    }
+
+    .reservation-table tbody tr:hover {
+      background: var(--surface-alt);
+    }
+
+    .reservation-table tbody tr.row-cancelled {
+      opacity: 0.5;
+    }
+
+    .reservation-table tbody td {
+      padding: 12px 16px;
+      font-size: 13px;
+      color: var(--text);
+      vertical-align: middle;
+    }
+
+    .td-name {
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .td-email {
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+
+    .td-muted {
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .td-timestamp {
+      font-size: 11px;
+      color: var(--text-label);
+      white-space: nowrap;
+    }
+
+    /* Status badge */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 10px;
+      border-radius: 100px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      white-space: nowrap;
+    }
+
+    .status-badge.badge-active {
+      background: var(--booked-bg);
+      color: var(--booked-text);
+    }
+
+    .status-badge.badge-cancelled {
+      background: var(--cancel-bg);
+      color: var(--cancel-text);
+    }
+
+    /* Cancel button */
+    .btn-cancel {
+      background: transparent;
+      border: 1px solid var(--danger-border);
+      border-radius: var(--radius-sm);
+      color: var(--danger);
+      font-family: 'Noto Sans JP', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 5px 14px;
+      cursor: pointer;
+      transition: all 0.18s;
+      white-space: nowrap;
+    }
+
+    .btn-cancel:hover {
+      background: var(--danger-light);
+      border-color: var(--danger);
+    }
+
+    /* ===== State panels ===== */
+    .state-panel {
+      padding: 52px 24px;
+      text-align: center;
+    }
+
+    .state-panel p {
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    .spinner {
+      width: 28px;
+      height: 28px;
+      border: 2px solid var(--border-strong);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.75s linear infinite;
+      margin: 0 auto 14px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .error-icon {
+      font-size: 24px;
+      margin-bottom: 12px;
+    }
+
+    /* ===== Modal ===== */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(26,26,26,0.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 24px;
+    }
+
+    .modal {
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+      padding: 36px;
+      max-width: 460px;
+      width: 100%;
+      animation: modal-in 0.18s ease;
+    }
+
+    @keyframes modal-in {
+      from { opacity: 0; transform: translateY(-12px) scale(0.97); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .modal-title {
+      font-family: 'Noto Serif JP', serif;
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: 0.04em;
+      margin-bottom: 18px;
+    }
+
+    .modal-detail {
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      font-size: 13px;
+      line-height: 2;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    .modal-detail strong {
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    .modal-warn {
+      font-size: 12px;
+      color: var(--danger);
+      margin-bottom: 24px;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    .btn-modal-back {
+      background: var(--surface-alt);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm);
+      color: var(--text-muted);
+      font-family: 'Noto Sans JP', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 9px 22px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .btn-modal-back:hover { background: var(--border); }
+
+    .btn-modal-confirm {
+      background: var(--danger);
+      border: 1px solid var(--danger);
+      border-radius: var(--radius-sm);
+      color: #fff;
+      font-family: 'Noto Sans JP', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 9px 22px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .btn-modal-confirm:hover { background: #9e2b2b; }
+
+    .btn-modal-confirm:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* ===== Print ===== */
+    @media print {
+      .page-header,
+      .no-print { display: none !important; }
+
+      body { background: white; font-size: 12px; }
+
+      .main { padding: 12px 0; max-width: 100%; }
+
+      .date-heading { margin-bottom: 16px; padding-bottom: 10px; }
+
+      .section { margin-bottom: 24px; }
+
+      .summary-table-wrap,
+      .table-wrap { box-shadow: none; border-color: #ccc; }
+
+      .reservation-table thead th { background: #efefef !important; color: #333; }
+
+      .btn-cancel { display: none !important; }
+
+      thead { display: table-header-group; }
+    }
+
+    /* ===== Responsive ===== */
+    @media (max-width: 960px) {
+      .page-header { padding: 0 20px; }
+      .main { padding: 28px 16px 56px; }
+    }
+
+    @media (max-width: 680px) {
+      .page-header {
+        height: auto;
+        padding: 14px 16px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+        position: static;
+      }
+
+      .header-controls {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      .date-heading {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+      }
+
+      .date-heading-text { font-size: 20px; }
+
+      .summary-table thead th:first-child { width: 90px; }
+      .summary-part-time { display: none; }
+      .summary-guest { display: none; }
+
+      .modal { padding: 24px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ===== Header ===== -->
+<header class="page-header no-print">
+  <div class="header-brand">
+    <span class="header-brand-eyebrow">ADMIN</span>
+    <h1 class="header-brand-title">予約管理</h1>
+  </div>
+  <div class="header-controls">
+    <div class="date-picker-wrap">
+      <span class="date-picker-label">日付</span>
+      <input type="date" id="dateInput" />
+    </div>
+    <button class="btn-print" id="printBtn" title="印刷">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 6V2h8v4"/>
+        <rect x="2" y="6" width="12" height="6" rx="1"/>
+        <path d="M4 9v5h8V9"/>
+        <circle cx="12" cy="9" r="0.5" fill="currentColor" stroke="none"/>
+      </svg>
+      印刷
+    </button>
+  </div>
+</header>
+
+<!-- ===== Main ===== -->
+<main class="main">
+
+  <!-- Date heading -->
+  <div class="date-heading">
+    <h2 class="date-heading-text" id="dateHeading">—</h2>
+    <span class="date-today-badge" id="todayBadge" style="display:none">本日</span>
+  </div>
+
+  <!-- Summary -->
+  <section class="section">
+    <div class="section-header">
+      <h2 class="section-title">空き状況サマリー</h2>
+    </div>
+    <div class="summary-table-wrap">
+      <table class="summary-table">
+        <thead>
+          <tr>
+            <th></th>
+            <th>テーブルA（4人がけ）</th>
+            <th>テーブルB（2人がけ）</th>
+            <th>テーブルC（2人がけ）</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="summary-row-head">
+              <span class="summary-part-label">第1部</span>
+              <span class="summary-part-time">17:00〜19:00</span>
+            </td>
+            <td class="cell-loading" id="sum-first-4seat">
+              <div class="summary-cell-inner">
+                <span class="summary-status">—</span>
+                <span class="summary-guest"></span>
+              </div>
+            </td>
+            <td class="cell-loading" id="sum-first-2seat-1">
+              <div class="summary-cell-inner">
+                <span class="summary-status">—</span>
+                <span class="summary-guest"></span>
+              </div>
+            </td>
+            <td class="cell-loading" id="sum-first-2seat-2">
+              <div class="summary-cell-inner">
+                <span class="summary-status">—</span>
+                <span class="summary-guest"></span>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="summary-row-head">
+              <span class="summary-part-label">第2部</span>
+              <span class="summary-part-time">19:30〜21:30</span>
+            </td>
+            <td class="cell-loading" id="sum-second-4seat">
+              <div class="summary-cell-inner">
+                <span class="summary-status">—</span>
+                <span class="summary-guest"></span>
+              </div>
+            </td>
+            <td class="cell-loading" id="sum-second-2seat-1">
+              <div class="summary-cell-inner">
+                <span class="summary-status">—</span>
+                <span class="summary-guest"></span>
+              </div>
+            </td>
+            <td class="cell-loading" id="sum-second-2seat-2">
+              <div class="summary-cell-inner">
+                <span class="summary-status">—</span>
+                <span class="summary-guest"></span>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Reservation List -->
+  <section class="section">
+    <div class="section-header">
+      <h2 class="section-title">予約一覧</h2>
+      <span class="count-badge" id="countBadge" style="display:none"></span>
+    </div>
+
+    <!-- Loading -->
+    <div class="table-wrap" id="stateLoading">
+      <div class="state-panel">
+        <div class="spinner"></div>
+        <p>読み込み中...</p>
+      </div>
+    </div>
+
+    <!-- Empty -->
+    <div class="table-wrap" id="stateEmpty" style="display:none">
+      <div class="state-panel">
+        <p>この日の予約はありません</p>
+      </div>
+    </div>
+
+    <!-- Error -->
+    <div class="table-wrap" id="stateError" style="display:none">
+      <div class="state-panel">
+        <div class="error-icon">⚠</div>
+        <p id="errorMsg">データの取得に失敗しました。<br>GAS_URL の設定を確認してください。</p>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrap" id="stateTable" style="display:none">
+      <div class="table-scroll">
+        <table class="reservation-table">
+          <thead>
+            <tr>
+              <th>受付日時</th>
+              <th>お名前</th>
+              <th>メールアドレス</th>
+              <th>部</th>
+              <th>人数</th>
+              <th>テーブル</th>
+              <th>ステータス</th>
+              <th class="no-print">操作</th>
+            </tr>
+          </thead>
+          <tbody id="reservationTbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ===== Cancel Modal ===== -->
+<div class="modal-overlay" id="modalOverlay" style="display:none" role="dialog" aria-modal="true">
+  <div class="modal">
+    <h3 class="modal-title">予約のキャンセル確認</h3>
+    <div class="modal-detail" id="modalDetail"></div>
+    <p class="modal-warn">※ この操作は元に戻せません。</p>
+    <div class="modal-actions">
+      <button class="btn-modal-back" id="modalBackBtn">戻る</button>
+      <button class="btn-modal-confirm" id="modalConfirmBtn">キャンセルする</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ============================================================
+  //  ★ GAS（管理者用）デプロイ URL をここに設定してください
+  //    reservation_admin.gs をデプロイして発行された URL をコピー
+  // ============================================================
+  const GAS_URL = 'https://script.google.com/macros/s/YOUR_ADMIN_SCRIPT_ID/exec';
+
+  // ============================================================
+  //  State
+  // ============================================================
+  let pendingCancelRowIndex = null;
+
+  // サマリーの定義: id / 部の部分一致キー / テーブルの部分一致キー
+  const SUMMARY_DEFS = [
+    { id: 'sum-first-4seat',    partKey: '第1部', tableKey: 'テーブルA' },
+    { id: 'sum-first-2seat-1',  partKey: '第1部', tableKey: 'テーブルB' },
+    { id: 'sum-first-2seat-2',  partKey: '第1部', tableKey: 'テーブルC' },
+    { id: 'sum-second-4seat',   partKey: '第2部', tableKey: 'テーブルA' },
+    { id: 'sum-second-2seat-1', partKey: '第2部', tableKey: 'テーブルB' },
+    { id: 'sum-second-2seat-2', partKey: '第2部', tableKey: 'テーブルC' },
+  ];
+
+  // ============================================================
+  //  初期化
+  // ============================================================
+  (function init() {
+    const today = new Date();
+    const todayStr = toDateStr(today);
+
+    document.getElementById('dateInput').value = todayStr;
+    applyDateHeading(todayStr);
+    fetchReservations(todayStr);
+
+    document.getElementById('dateInput').addEventListener('change', function () {
+      applyDateHeading(this.value);
+      fetchReservations(this.value);
+    });
+
+    document.getElementById('printBtn').addEventListener('click', () => window.print());
+    document.getElementById('modalBackBtn').addEventListener('click', closeModal);
+    document.getElementById('modalConfirmBtn').addEventListener('click', execCancel);
+    document.getElementById('modalOverlay').addEventListener('click', function (e) {
+      if (e.target === this) closeModal();
+    });
+  })();
+
+  // ============================================================
+  //  日付ヘッダー更新
+  // ============================================================
+  function applyDateHeading(dateStr) {
+    const d = parseDateStr(dateStr);
+    document.getElementById('dateHeading').textContent = formatDateJP(d);
+
+    const todayStr = toDateStr(new Date());
+    const badge = document.getElementById('todayBadge');
+    badge.style.display = (dateStr === todayStr) ? '' : 'none';
+  }
+
+  // ============================================================
+  //  データ取得
+  // ============================================================
+  async function fetchReservations(date) {
+    showPanel('loading');
+    resetSummary();
+
+    try {
+      const res  = await fetch(`${GAS_URL}?action=list&date=${date}`);
+      const json = await res.json();
+
+      if (json.error) throw new Error(json.error);
+
+      const reservations = json.reservations || [];
+      renderSummary(reservations);
+      renderTable(reservations);
+    } catch (err) {
+      console.error(err);
+      showPanel('error');
+    }
+  }
+
+  // ============================================================
+  //  サマリー描画
+  // ============================================================
+  function resetSummary() {
+    SUMMARY_DEFS.forEach(({ id }) => {
+      const cell = document.getElementById(id);
+      if (!cell) return;
+      cell.className = 'cell-loading';
+      cell.querySelector('.summary-status').textContent = '—';
+      cell.querySelector('.summary-guest').textContent  = '';
+    });
+  }
+
+  function renderSummary(reservations) {
+    SUMMARY_DEFS.forEach(({ id, partKey, tableKey }) => {
+      const cell = document.getElementById(id);
+      if (!cell) return;
+
+      const booking = reservations.find(r =>
+        r.part.includes(partKey) &&
+        r.table.includes(tableKey) &&
+        r.status !== 'キャンセル'
+      );
+
+      const statusEl = cell.querySelector('.summary-status');
+      const guestEl  = cell.querySelector('.summary-guest');
+
+      if (booking) {
+        cell.className = 'cell-booked';
+        statusEl.textContent = '予約済み';
+        guestEl.textContent  = `${booking.name}様（${booking.guests}）`;
+      } else {
+        cell.className = 'cell-available';
+        statusEl.textContent = '空き';
+        guestEl.textContent  = '';
+      }
+    });
+  }
+
+  // ============================================================
+  //  テーブル描画
+  // ============================================================
+  function renderTable(reservations) {
+    const badge = document.getElementById('countBadge');
+    const tbody = document.getElementById('reservationTbody');
+    tbody.innerHTML = '';
+
+    if (reservations.length === 0) {
+      badge.style.display = 'none';
+      showPanel('empty');
+      return;
+    }
+
+    // アクティブ件数
+    const activeCount = reservations.filter(r => r.status !== 'キャンセル').length;
+    badge.textContent  = `${activeCount}件`;
+    badge.style.display = 'inline-flex';
+
+    // アクティブを上、キャンセル済みを下に表示
+    const sorted = [...reservations].sort((a, b) => {
+      const aC = a.status === 'キャンセル';
+      const bC = b.status === 'キャンセル';
+      if (aC === bC) return 0;
+      return aC ? 1 : -1;
+    });
+
+    sorted.forEach(r => {
+      const cancelled = r.status === 'キャンセル';
+      const tr = document.createElement('tr');
+      if (cancelled) tr.classList.add('row-cancelled');
+
+      tr.innerHTML = `
+        <td class="td-timestamp">${esc(r.timestamp)}</td>
+        <td class="td-name">${esc(r.name)}</td>
+        <td class="td-email">${esc(r.email)}</td>
+        <td class="td-muted">${esc(r.part)}</td>
+        <td class="td-muted" style="text-align:center">${esc(r.guests)}</td>
+        <td class="td-muted">${esc(r.table)}</td>
+        <td>
+          <span class="status-badge ${cancelled ? 'badge-cancelled' : 'badge-active'}">
+            ${esc(r.status)}
+          </span>
+        </td>
+        <td class="no-print">
+          ${cancelled
+            ? '<span style="color:var(--text-label);font-size:12px;">—</span>'
+            : `<button class="btn-cancel"
+                 data-row="${r.rowIndex}"
+                 data-name="${escAttr(r.name)}"
+                 data-part="${escAttr(r.part)}"
+                 data-table="${escAttr(r.table)}"
+                 data-guests="${escAttr(r.guests)}">
+                 キャンセル
+               </button>`
+          }
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    // キャンセルボタンにイベント付与
+    tbody.querySelectorAll('.btn-cancel').forEach(btn => {
+      btn.addEventListener('click', function () {
+        openModal(
+          Number(this.dataset.row),
+          this.dataset.name,
+          this.dataset.part,
+          this.dataset.table,
+          this.dataset.guests
+        );
+      });
+    });
+
+    showPanel('table');
+  }
+
+  // ============================================================
+  //  パネル切り替え
+  // ============================================================
+  function showPanel(name) {
+    const panels = { loading: 'stateLoading', empty: 'stateEmpty', error: 'stateError', table: 'stateTable' };
+    Object.entries(panels).forEach(([key, id]) => {
+      document.getElementById(id).style.display = (key === name) ? '' : 'none';
+    });
+  }
+
+  // ============================================================
+  //  モーダル
+  // ============================================================
+  function openModal(rowIndex, name, part, table, guests) {
+    pendingCancelRowIndex = rowIndex;
+    document.getElementById('modalDetail').innerHTML =
+      `<strong>${esc(name)}</strong> 様<br>` +
+      `${esc(part)}<br>` +
+      `${esc(table)}　${esc(guests)}`;
+    const confirmBtn = document.getElementById('modalConfirmBtn');
+    confirmBtn.disabled = false;
+    confirmBtn.textContent = 'キャンセルする';
+    document.getElementById('modalOverlay').style.display = 'flex';
+  }
+
+  function closeModal() {
+    document.getElementById('modalOverlay').style.display = 'none';
+    pendingCancelRowIndex = null;
+  }
+
+  async function execCancel() {
+    if (!pendingCancelRowIndex) return;
+
+    const btn = document.getElementById('modalConfirmBtn');
+    btn.disabled    = true;
+    btn.textContent = '処理中...';
+
+    try {
+      const res  = await fetch(GAS_URL, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ action: 'cancel', rowIndex: pendingCancelRowIndex }),
+      });
+      const json = await res.json();
+
+      if (json.status !== 'success') throw new Error(json.message || 'unknown error');
+
+      closeModal();
+      fetchReservations(document.getElementById('dateInput').value);
+    } catch (err) {
+      console.error(err);
+      alert('キャンセル処理に失敗しました。しばらくしてから再度お試しください。');
+      btn.disabled    = false;
+      btn.textContent = 'キャンセルする';
+    }
+  }
+
+  // ============================================================
+  //  ユーティリティ
+  // ============================================================
+
+  // "YYYY-MM-DD" → Date（ローカル時刻で解釈）
+  function parseDateStr(str) {
+    const [y, m, d] = str.split('-').map(Number);
+    return new Date(y, m - 1, d);
+  }
+
+  // Date → "YYYY-MM-DD"
+  function toDateStr(d) {
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  }
+
+  // Date → "2025年4月1日（火）"
+  function formatDateJP(d) {
+    const days = ['日','月','火','水','木','金','土'];
+    return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日（${days[d.getDay()]}）`;
+  }
+
+  // XSS対策: HTML特殊文字エスケープ
+  function esc(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  // 属性値用エスケープ
+  function escAttr(str) {
+    return String(str).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+</script>
+</body>
+</html>
