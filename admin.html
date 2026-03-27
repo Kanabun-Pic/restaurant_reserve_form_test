@@ -810,18 +810,43 @@
   const GAS_URL = 'https://script.google.com/macros/s/AKfycbxSZeKwUfvhV5s4ASQ4a5CyEEtwVE-1n3ihW78syW9HNwAcIzQuQ-7_IvWjQf-DDRUHrQ/exec';
 
   // ============================================================
+  //  ★ マスターデータ（表示テキスト変更はここだけ編集してください）
+  //
+  //  予約フォームの選択肢テキストを変更した場合は、
+  //  下記の「値（右側）」を同じ文言に書き換えてください。
+  //  予約一覧の部・テーブル列の表示に自動的に反映されます。
+  //
+  //  ※「キー（左側の "1" "2" など）」は変更しないでください。
+  //    キーはシートへの保存・照合に使われる内部識別子です。
+  // ============================================================
+
+  // 部（時間帯）マスター: キー "1"=第1部、"2"=第2部
+  const PART_MASTER = {
+    '1': 'ランチ　11:30〜13:30',
+    '2': 'ティータイム　14:00〜16:00',
+  };
+
+  // テーブルマスター: キー "1"=A席、"2"=B席、"3"=C席
+  const TABLE_MASTER = {
+    '1': 'テーブルA（4人がけ）',
+    '2': 'テーブルB（2人がけ）',
+    '3': 'テーブルC（2人がけ）',
+  };
+
+  // ============================================================
   //  State
   // ============================================================
   let pendingCancelRowIndex = null;
 
-  // サマリーの定義: id / 部の部分一致キー / テーブルの部分一致キー
+  // サマリーの定義: id / 部キー（PART_MASTERのキー） / テーブルキー（TABLE_MASTERのキー）
+  // シートに保存されたキーと完全一致で照合する
   const SUMMARY_DEFS = [
-    { id: 'sum-first-4seat',    partKey: '第1部', tableKey: 'テーブルA' },
-    { id: 'sum-first-2seat-1',  partKey: '第1部', tableKey: 'テーブルB' },
-    { id: 'sum-first-2seat-2',  partKey: '第1部', tableKey: 'テーブルC' },
-    { id: 'sum-second-4seat',   partKey: '第2部', tableKey: 'テーブルA' },
-    { id: 'sum-second-2seat-1', partKey: '第2部', tableKey: 'テーブルB' },
-    { id: 'sum-second-2seat-2', partKey: '第2部', tableKey: 'テーブルC' },
+    { id: 'sum-first-4seat',    partKey: '1', tableKey: '1' },
+    { id: 'sum-first-2seat-1',  partKey: '1', tableKey: '2' },
+    { id: 'sum-first-2seat-2',  partKey: '1', tableKey: '3' },
+    { id: 'sum-second-4seat',   partKey: '2', tableKey: '1' },
+    { id: 'sum-second-2seat-1', partKey: '2', tableKey: '2' },
+    { id: 'sum-second-2seat-2', partKey: '2', tableKey: '3' },
   ];
 
   // ============================================================
@@ -900,9 +925,10 @@
       const cell = document.getElementById(id);
       if (!cell) return;
 
+      // シートのキーと完全一致で照合（部分一致ではなくキー同士の完全一致）
       const booking = reservations.find(r =>
-        r.part.includes(partKey) &&
-        r.table.includes(tableKey) &&
+        r.part  === partKey &&
+        r.table === tableKey &&
         r.status !== 'キャンセル'
       );
 
@@ -953,13 +979,17 @@
       const tr = document.createElement('tr');
       if (cancelled) tr.classList.add('row-cancelled');
 
+      // キー → 表示テキストに変換して表示
+      const partLabel  = PART_MASTER[r.part]  || r.part;
+      const tableLabel = TABLE_MASTER[r.table] || r.table;
+
       tr.innerHTML = `
         <td class="td-timestamp">${esc(r.timestamp)}</td>
         <td class="td-name">${esc(r.name)}</td>
         <td class="td-email">${esc(r.email)}</td>
-        <td class="td-muted">${esc(r.part)}</td>
+        <td class="td-muted">${esc(partLabel)}</td>
         <td class="td-muted" style="text-align:center">${esc(r.guests)}</td>
-        <td class="td-muted">${esc(r.table)}</td>
+        <td class="td-muted">${esc(tableLabel)}</td>
         <td>
           <span class="status-badge ${cancelled ? 'badge-cancelled' : 'badge-active'}">
             ${esc(r.status)}
@@ -971,8 +1001,8 @@
             : `<button class="btn-cancel"
                  data-row="${r.rowIndex}"
                  data-name="${escAttr(r.name)}"
-                 data-part="${escAttr(r.part)}"
-                 data-table="${escAttr(r.table)}"
+                 data-part="${escAttr(partLabel)}"
+                 data-table="${escAttr(tableLabel)}"
                  data-guests="${escAttr(r.guests)}">
                  キャンセル
                </button>`

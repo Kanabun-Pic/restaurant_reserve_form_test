@@ -501,8 +501,8 @@
             <div class="select-wrapper">
               <select id="part" name="part">
                 <option value="">お時間を選択</option>
-                <option value="first">ランチ　11:30〜13:30</option>
-                <option value="second">ティータイム　14:00〜16:00</option>
+                <option value="1">ランチ　11:30〜13:30</option>
+                <option value="2">ティータイム　14:00〜16:00</option>
               </select>
             </div>
           </div>
@@ -529,21 +529,21 @@
           <label>お席<span class="required-mark">*</span></label>
           <div class="radio-group">
             <label class="radio-option">
-              <input type="radio" name="table" value="4seat" />
+              <input type="radio" name="table" value="1" />
               <div class="radio-label">
                 <div class="radio-title">テーブル席（4名様まで）</div>
                 <div class="radio-sub">ゆったりとお過ごしいただける広めのお席です</div>
               </div>
             </label>
             <label class="radio-option">
-              <input type="radio" name="table" value="2seat-a" />
+              <input type="radio" name="table" value="2" />
               <div class="radio-label">
                 <div class="radio-title">窓側のお席（2名様まで）</div>
                 <div class="radio-sub">中庭の緑を眺めながらお過ごしいただけます</div>
               </div>
             </label>
             <label class="radio-option">
-              <input type="radio" name="table" value="2seat-b" />
+              <input type="radio" name="table" value="3" />
               <div class="radio-label">
                 <div class="radio-title">カウンター席（2名様まで）</div>
                 <div class="radio-sub">調理の様子をご覧いただけるお席です</div>
@@ -633,7 +633,7 @@
     const part = document.getElementById('part').value;
     if (!date || !part) return;
 
-    const tables = ['4seat', '2seat-a', '2seat-b'];
+    const tables = ['1', '2', '3']; // テーブルの内部キー（TABLE_MASTERのキーと対応）
     for (const table of tables) {
       try {
         const res  = await fetch(`${GAS_URL}?date=${date}&part=${part}&table=${table}`);
@@ -736,7 +736,7 @@
       name:   document.getElementById('name').value.trim(),
       email:  document.getElementById('email').value.trim(),
       date:   dateEl.value,
-      part:   partEl.options[partEl.selectedIndex].text,
+      part:   partEl.value, // 表示テキストではなく内部キー（"1"/"2"）を送信する
       guests: document.getElementById('guests').value,
       table:  document.querySelector('input[name="table"]:checked').value,
     };
@@ -767,17 +767,23 @@
       const screen = document.getElementById('successScreen');
       screen.style.display = 'block';
 
+      // キー → 表示テキスト変換（GAS の PART_MASTER / TABLE_MASTER と同じ内容を定義）
+      // ★ フォームの選択肢テキストを変更した場合は、ここの値も合わせて変更してください
+      const partLabel = {
+        '1': 'ランチ　11:30〜13:30',
+        '2': 'ティータイム　14:00〜16:00',
+      };
       const tableLabel = {
-        '4seat':   'テーブル席',
-        '2seat-a': '窓側のお席',
-        '2seat-b': 'カウンター席',
+        '1': 'テーブル席',
+        '2': '窓側のお席',
+        '3': 'カウンター席',
       };
 
       document.getElementById('successDetail').innerHTML =
         `<span class="label">お名前</span>` +
         `<span class="value">${data.name} 様</span>` +
         `<span class="label">日時</span>` +
-        `<span class="value">${data.date.replace(/-/g, '/')}　${data.part}</span>` +
+        `<span class="value">${data.date.replace(/-/g, '/')}　${partLabel[data.part] || data.part}</span>` +
         `<span class="label">人数 / お席</span>` +
         `<span class="value">${data.guests}名様　/ ${tableLabel[data.table] || data.table}</span>` +
         `<span class="label">確認メール送信先</span>` +
